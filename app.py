@@ -1,21 +1,33 @@
 import streamlit as st
 import pandas as pd
+
 from filters import sidebar_filters
 from charts import *
 
-st.set_page_config(page_title="EdStats Dashboard", layout="wide")
+st.set_page_config(
+    page_title="EdStats Dashboard",
+    layout="wide"
+)
 
 st.title("📊 EdStats Dashboard")
 
+# Load dataset
 df = pd.read_csv("EdStatsData_Sample.csv")
 
-# Remove empty columns
-df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+# Remove unnamed columns
+df = df.loc[
+    :,
+    ~df.columns.str.contains("^Unnamed")
+]
 
-# Identify year columns
-year_cols = [c for c in df.columns if str(c).isdigit()]
+# Year columns
+year_cols = [
+    col
+    for col in df.columns
+    if str(col).isdigit()
+]
 
-# Convert to long format
+# Convert wide -> long format
 df = df.melt(
     id_vars=[
         "Country Name",
@@ -28,16 +40,63 @@ df = df.melt(
     value_name="Value"
 )
 
-df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
-df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
+df["Year"] = pd.to_numeric(
+    df["Year"],
+    errors="coerce"
+)
 
+df["Value"] = pd.to_numeric(
+    df["Value"],
+    errors="coerce"
+)
+
+df = df.dropna(subset=["Value"])
+
+# Sidebar Filters
 df = sidebar_filters(df)
 
-col1, col2 = st.columns(2)
-col1.metric("Rows", df.shape[0])
-col2.metric("Columns", df.shape[1])
+# KPI Cards
+col1, col2, col3, col4 = st.columns(4)
 
-histogram_chart(df)
+col1.metric(
+    "Countries",
+    df["Country Name"].nunique()
+)
+
+col2.metric(
+    "Indicators",
+    df["Indicator Name"].nunique()
+)
+
+col3.metric(
+    "Records",
+    f"{len(df):,}"
+)
+
+col4.metric(
+    "Average Value",
+    round(df["Value"].mean(), 2)
+)
+
+st.divider()
+
+# Charts
 line_chart(df)
-scatter_chart(df)
-area_chart(df)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    histogram_chart(df)
+
+with col2:
+    scatter_chart(df)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    area_chart(df)
+
+with col2:
+    bar_chart(df)
+
+heatmap_chart(df)
