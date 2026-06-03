@@ -13,12 +13,7 @@ df = pd.read_csv("EdStatsData_Sample.csv")
 
 st.success("Dataset Loaded Successfully!")
 
-col1, col2 = st.columns(2)
-
-with col1:
 st.metric("Rows", df.shape[0])
-
-with col2:
 st.metric("Columns", df.shape[1])
 
 st.subheader("Dataset Preview")
