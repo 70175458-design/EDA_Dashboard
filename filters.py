@@ -1,20 +1,38 @@
 import streamlit as st
 
-def sidebar_filters(df):
-    if "Region" in df.columns:
-        regions = st.sidebar.multiselect(
-            "Region",
-            sorted(df["Region"].dropna().unique()),
-            default=sorted(df["Region"].dropna().unique())
-        )
-        df = df[df["Region"].isin(regions)]
 
-    if "Income Group" in df.columns:
-        income = st.sidebar.multiselect(
-            "Income Group",
-            sorted(df["Income Group"].dropna().unique()),
-            default=sorted(df["Income Group"].dropna().unique())
-        )
-        df = df[df["Income Group"].isin(income)]
+def sidebar_filters(df):
+    st.sidebar.header("🔎 Filters")
+
+    countries = st.sidebar.multiselect(
+        "Country",
+        sorted(df["Country Name"].dropna().unique())
+    )
+
+    indicators = st.sidebar.multiselect(
+        "Indicator",
+        sorted(df["Indicator Name"].dropna().unique())
+    )
+
+    year_min = int(df["Year"].min())
+    year_max = int(df["Year"].max())
+
+    year_range = st.sidebar.slider(
+        "Year Range",
+        min_value=year_min,
+        max_value=year_max,
+        value=(year_min, year_max)
+    )
+
+    if countries:
+        df = df[df["Country Name"].isin(countries)]
+
+    if indicators:
+        df = df[df["Indicator Name"].isin(indicators)]
+
+    df = df[
+        (df["Year"] >= year_range[0]) &
+        (df["Year"] <= year_range[1])
+    ]
 
     return df
