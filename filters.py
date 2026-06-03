@@ -9,7 +9,7 @@ default=sorted(df["Region"].dropna().unique())
 )
 df = df[df["Region"].isin(regions)]
 
-```
+
 if "Income Group" in df.columns:
     income = st.sidebar.multiselect(
         "Income Group",
